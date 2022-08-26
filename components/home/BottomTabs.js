@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native'
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import { Divider } from 'react-native-elements'
 
@@ -52,7 +52,11 @@ const BottomTabs = ({ icons }) => {
 
 const styles = StyleSheet.create({
     wrapper: {
-
+        position: 'absolute',
+        width: '100%',
+        bottom: '0%',
+        zIndex: 999,
+        backgroundColor: '#000'
     },
     container: {
         flexDirection: 'row',
