@@ -3,6 +3,9 @@
     "name": "blank",
     "slug": "blank",
     "version": "1.0.0",
+    "packagerOpts": {
+      "sourceExts": ["cjs"]
+    },
     "platforms": [
       "ios",
       "android",
