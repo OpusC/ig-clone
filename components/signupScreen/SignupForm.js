@@ -1,23 +1,51 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native'
 import React from 'react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import Validator from 'email-validator'
+import { authentication } from '../../firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { db } from '../../firebase'
+import { doc, setDoc} from 'firebase/firestore'
 
-const SignupForm = ({navigation}) => {
+const SignupForm = ({ navigation }) => {
     const SignupFormSchema = Yup.object().shape({
         email: Yup.string().email().required('An email is required'),
         username: Yup.string().required().min(2, 'A username is required'),
         password: Yup.string().required().min(8, 'Your password has to have at least 8 characters')
     })
 
-    const onSignUp = async (auth)
+    const onSignUp = async (email, password, username) => {
+        try {
+            const authUser = await createUserWithEmailAndPassword(authentication, email, password)
+            console.log('Firebase User Created Successfully ' + username + ' ' + password)
+
+            await setDoc(doc(db, 'users', 'users'),
+            {
+                owner_uid: authUser.user.uid,
+                username: username,
+                email: authUser.user.email,
+                profile_picture: await getRandomProfilePicture(),
+            })
+            
+        } catch (error) {
+            Alert.alert('Error', error.message)
+        }
+    }
+
+    const getRandomProfilePicture = async () => {
+        const response = await fetch('https://randomuser.me/api')
+        const data = await response.json()
+        return data.results[0].picture.large
+    }
+
+
     return (
         <View style={styles.wrapper}>
             <Formik
                 initialValues={{ email: '', username: '', password: '' }}
                 onSubmit={(values) => {
-                    console.log(values)
+                    onSignUp(values.email, values.password, values.username)
                 }}
                 validationSchema={SignupFormSchema}
                 validateOnMount={true}>
@@ -45,7 +73,7 @@ const SignupForm = ({navigation}) => {
                         </View>
                         <View
                             style={[styles.inputField, {
-                                borderColor: 1 > values.username.length  || Validator.validate(values.username)
+                                borderColor: 1 > values.username.length || values.username.length >= 2
                                     ? '#ccc'
                                     : 'red'
                             },
@@ -70,16 +98,16 @@ const SignupForm = ({navigation}) => {
                             },
                             ]}
                         >
-                        <TextInput
-                            placeholderTextColor='#444'
-                            placeholder='Password'
-                            autoCapitalize='none'
-                            secureTextEntry={true}
-                            textContentType='password'
-                            onChangeText={handleChange('password')}
-                            onBlur={handleBlur('password')}
-                            value={values.password}
-                        />
+                            <TextInput
+                                placeholderTextColor='#444'
+                                placeholder='Password'
+                                autoCapitalize='none'
+                                secureTextEntry={true}
+                                textContentType='password'
+                                onChangeText={handleChange('password')}
+                                onBlur={handleBlur('password')}
+                                value={values.password}
+                            />
                         </View>
 
                         <Pressable titleSize={20}

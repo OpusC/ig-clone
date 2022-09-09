@@ -11,6 +11,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 
 
 
+
+
 const LoginForm = ({ navigation }) => {
     const LoginFormSchema = Yup.object().shape({
         email: Yup.string().email().required('An email is required'),
